@@ -88,12 +88,12 @@ class LinkCrawler(CrawlerBase):
             adv_links.extend(links)
         """It is better to write the following line of code in a separate method"""
         if store:
-            self.store([li.get('href') for li in adv_links])  # if not written = error Serialized
+            self.store([{'url': li.get('href')} for li in adv_links])  # if not written = error Serialized
         return adv_links
 
     def store(self, data, *args):
         # به این دلیل filename رو *args گذاشتم که اختباری باشد وارد کردن آن!!
-        self.storage.store(data, 'links')
+        self.storage.store(data, 'advertisements_links')
 
 
 class DataCrawler(CrawlerBase):
@@ -121,6 +121,6 @@ class DataCrawler(CrawlerBase):
                 # البته که میتونم مثلا از لینکه یه اسم رندوم بسازیم
                 self.store(data_dict, data_dict.get('post_id', 'sample'))
 
-    def store(self, data, filename):
+    def store(self, data, *args):
         # دقت کنید اینجا چون لینک های صفحه جزییات کرال میشوند filename نباید null باشند
-        self.storage.store(data, filename)
+        self.storage.store(data, 'advertisement_data')
