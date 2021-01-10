@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 
 import requests
 from bs4 import BeautifulSoup
-from config import BASE_LINK
+from config import BASE_LINK, STORAGE_TYPE
 import json
-
+from storage import FileStorage, MongoStorage
 from parser import AdvertisementPageParser
 
 
@@ -12,6 +12,15 @@ class CrawlerBase(ABC):
     """
         class Base
     """
+
+    def __init__(self):
+        self.storage = self.__set_storage()
+
+    @staticmethod
+    def __set_storage():
+        if STORAGE_TYPE == 'mongo':
+            return MongoStorage()
+        return FileStorage()
 
     @abstractmethod
     def start(self, store=False):
@@ -43,6 +52,7 @@ class LinkCrawler(CrawlerBase):
     def __init__(self, cities, link=BASE_LINK):
         self.cities = cities
         self.link = link
+        super().__init__()
 
     # def get_page(self, url, start=0):
     #     try:
@@ -83,8 +93,7 @@ class LinkCrawler(CrawlerBase):
 
     def store(self, data, *args):
         # به این دلیل filename رو *args گذاشتم که اختباری باشد وارد کردن آن!!
-        with open('data/links.json', 'w') as f:
-            f.write(json.dumps(data))
+        self.storage.store(data, 'links')
 
 
 class DataCrawler(CrawlerBase):
@@ -94,7 +103,8 @@ class DataCrawler(CrawlerBase):
 
     def __init__(self):
         self.links = self.__load_links()
-        self.parser = AdvertisementPageParser()
+        self.parser = AdvertisementPageParser()  # Composite
+        super().__init__()
 
     @staticmethod
     def __load_links():
@@ -113,6 +123,4 @@ class DataCrawler(CrawlerBase):
 
     def store(self, data, filename):
         # دقت کنید اینجا چون لینک های صفحه جزییات کرال میشوند filename نباید null باشند
-        with open(f'data/details/{filename}.json', 'w') as f:
-            f.write(json.dumps(data))
-        print(f'data/details/{filename}.json')  # برای بفهمم ذخیره شده
+        self.storage.store(data, filename)
