@@ -88,7 +88,8 @@ class LinkCrawler(CrawlerBase):
             adv_links.extend(links)
         """It is better to write the following line of code in a separate method"""
         if store:
-            self.store([{'url': li.get('href')} for li in adv_links])  # if not written = error Serialized
+            self.store(
+                [{'url': li.get('href'), 'flag': False} for li in adv_links])  # if not written = error Serialized
         return adv_links
 
     def store(self, data, *args):
@@ -102,19 +103,16 @@ class DataCrawler(CrawlerBase):
     """
 
     def __init__(self):
+        super().__init__()  # اینیت صدا زدم تا از استوریج یک instance داشته باشیم تا بر روی آن __load_link را call کنیم
         self.links = self.__load_links()
         self.parser = AdvertisementPageParser()  # Composite
-        super().__init__()
 
-    @staticmethod
-    def __load_links():
-        with open('data/links.json', 'r') as f:
-            links = json.loads(f.read())
-            return links
+    def __load_links(self):
+        return self.storage.load()
 
     def start(self, store=False):
         for link in self.links:
-            response = self.get(link)
+            response = self.get(link['url'])
             data_dict = self.parser.parse(response.text)
             if store:
                 # اگر post_id نداشتی یه sample به عنوان نام فایل بذار

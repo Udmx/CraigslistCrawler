@@ -9,6 +9,10 @@ class StorageBase(ABC):
     def store(self, data, *args):  # *args => for get Collection or filename
         pass
 
+    @abstractmethod
+    def load(self):
+        pass
+
 
 # اسم پترن زیر استراتژی هست چرا که crawl.py متد store نمیدونه کجا عمل سیو داره انجام میشه
 # مثال : درگاه پرداخت که باید با همه به یک شکل انجام بشه
@@ -23,10 +27,18 @@ class MongoStorage(StorageBase):
         else:
             collection.insert_one(data)  # دونه دونه ذخیره میکنی در یک کالکشن
 
+    def load(self):
+        return self.mongo.database.advertisements_links.find()
+
 
 class FileStorage(StorageBase):
     def store(self, data, *args):
-        filename = args[0] + '-' + str(data['post_id'])
+        filename = args[0] + '-' + data['post_id']
         with open(f'data/{filename}.json', 'w') as f:
             f.write(json.dumps(data))
         print(f'data/{filename}.json')  # برای بفهمم ذخیره شده
+
+    def load(self):
+        with open('data/advertisement_data.json', 'r') as f:
+            links = json.loads(f.read())
+            return links
