@@ -28,7 +28,14 @@ class MongoStorage(StorageBase):
             collection.insert_one(data)  # دونه دونه ذخیره میکنی در یک کالکشن
 
     def load(self):
-        return self.mongo.database.advertisements_links.find()
+        return self.mongo.database.advertisements_links.find({'flag': False})
+
+    def update_flag(self, data):
+        """پس از ذخیره سازی این متد میاد و flag رو برابر True قرار میدهد تا ما دوباره crawl نکنیم"""
+        self.mongo.database.advertisements_links.find_one_and_update(
+            {'_id': data['_id']},
+            {'$set': {'flag': True}}
+        )
 
 
 class FileStorage(StorageBase):
@@ -42,3 +49,7 @@ class FileStorage(StorageBase):
         with open('data/advertisement_data.json', 'r') as f:
             links = json.loads(f.read())
             return links
+
+    def update_flag(self):
+        """ این متد نوشتیم تا خطا در صورت نوع ذخیره سازی فایل به وجود نیاد و البته کاری لازم نیست بکنه"""
+        pass

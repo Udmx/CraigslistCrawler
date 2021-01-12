@@ -118,6 +118,7 @@ class DataCrawler(CrawlerBase):
                 # اگر post_id نداشتی یه sample به عنوان نام فایل بذار
                 # البته که میتونم مثلا از لینکه یه اسم رندوم بسازیم
                 self.store(data_dict, data_dict.get('post_id', 'sample'))
+            self.storage.update_flag(link)
 
     def store(self, data, *args):
         # دقت کنید اینجا چون لینک های صفحه جزییات کرال میشوند filename نباید null باشند
